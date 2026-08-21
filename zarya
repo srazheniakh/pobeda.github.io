@@ -1,1 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歴史 暗記トレーニング</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #4a90e2;
+        }
 
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: #666;
+            margin: 0 0 5px 0;
+        }
+
+        .progress {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        /* 説明文のエエリア */
+        .description-box {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            min-height: 120px;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+        }
+
+        /* 答えのエリア */
+        .answer-container {
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .answer-box {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d9534f;
+            min-height: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden {
+            visibility: hidden;
+        }
+
+        /* ボタン */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-show {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-show:hover {
+            background-color: #357abd;
+        }
+
+        .btn-next {
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div>
+        <header>
+            <h1>歴史 暗記トレーニング</h1>
+            <div class="progress" id="progress">問題 1 / 87</div>
+        </header>
+
+        <!-- 説明文 -->
+        <div class="description-box" id="description">
+            読み込み中...
+        </div>
+    </div>
+
+    <!-- 一番下の答えと操作エリア -->
+    <div class="answer-container">
+        <div class="answer-box hidden" id="answer">
+            <!-- ここに答えが表示されます -->
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-show" onclick="showAnswer()">答えを見る</button>
+            <button class="btn-next" onclick="nextQuestion()">次の問題</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 問題データ (元の11問 + PDF抽出の76問 = 計87問)
+    const quizData = [
+        // 元の11問
+        {
+            description: "fire",
+            answer: "解雇する"
+        },
+        {
+            description: "fine",
+            answer: "罰金を科す"
+        },
+        {
+            description: "eliminate",
+            answer: "取り除く"
+        },
+        {
+            description: "attempt",
+            answer: "試み"
+        },
+        {
+            description: "chemical",
+            answer: "化学薬品"
+        },
+        {
+            description: "expense",
+            answer: "費用"
+        },
+        {
+            description: "adolescent",
+            answer: "青年期の人"
+        },
+        {
+            description: "procedure",
+            answer: "手順"
+        },
+        {
+            description: "contract",
+            answer: "契約"
+        },
+        {
+            description: "soil",
+            answer: "土"
+        },
+          {
+            description: "cargo",
+            answer: "積荷"
+        },
+        {
+            description: "immune",
+            answer: "免疫の"
+        },
+        {
+            description: "agricultural",
+            answer: "農業の"
+        },
+
+
+        // PDF追加分（1ページ目）
+        {
+            description: "entire",
+            answer: "全体の"
+        },
+        {
+            description: "adopt",
+            answer: "採用する"
+        },
+        {
+            description: "conduct",
+            answer: "実施する"
+        },
+        {
+            description: "direct",
+            answer: "案内する"
+        },
+        {
+            description: "imply",
+            answer: "暗に示す"
+        },
+        {
+            description: "demonstrate",
+            answer: "実演する"
+        },
+        {
+            description: "prove",
+            answer: "証明する"
+        },
+        {
+            description: "defeat",
+            answer: "負かす"
+        },
+        {
+            description: "protest",
+            answer: "抗議する"
+        },
+        {
+            description: "preserve",
+            answer: "保護する"
+        },
+        {
+            description: "migrate",
+            answer: "移住する"
+        },
+        {
+            description: "confirm",
+            answer: "確認する"
+        },
+
+        // PDF追加分（2ページ目）
+        {
+            description: "intend",
+            answer: "～することを意図する"
+        },
+        {
+            description: "predict",
+            answer: "予測する"
+        },
+        {
+            description: "extend",
+            answer: "延長する"
+        },
+        {
+            description: "figure",
+            answer: "人物"
+        },
+        {
+            description: "theft",
+            answer: "盗み"
+        },
+        {
+            description: "candidate",
+            answer: "候補者"
+        },
+        {
+            description: "immigrant",
+            answer: "移住者"
+        },
+        {
+            description: "property",
+            answer: "不動産"
+        },
+        {
+            description: "habitat",
+            answer: "生息場所"
+        },
+        {
+            description: "symptom",
+            answer: "症状"
+        },
+        {
+            description: "eruption",
+            answer: "勃発"
+        },
+        {
+            description: "emission",
+            answer: "排気、放出"
+        },
+
+
+        // PDF追加分（3ページ目）
+        {
+            description: "executive",
+            answer: "重役"
+        },
+        {
+            description: "strategy",
+            answer: "戦略"
+        },
+        {
+            description: "riot",
+            answer: "暴動"
+        },
+        {
+            description: "district",
+            answer: "特色を持った地方"
+        },
+        {
+            description: "breed",
+            answer: "品種"
+        },
+        {
+            description: "conflict",
+            answer: "衝突"
+        },
+        {
+            description: "productivity",
+            answer: "生産性"
+        },
+        {
+            description: "organism",
+            answer: "有機体"
+        },
+        {
+            description: "representative",
+            answer: "代表者"
+        },
+        {
+            description: "warehouse",
+            answer: "倉庫"
+        },
+        {
+            description: "refund",
+            answer: "返金"
+        },
+        {
+            description: "tuition",
+            answer: "授業料"
+        },
+        {
+            description: "victim",
+            answer: "被害者"
+        },
+
+        // PDF追加分（4ページ目）
+        {
+            description: "dose",
+            answer: "薬の1回の服用量"
+        },
+        {
+            description: "waterfall",
+            answer: "滝"
+        },
+        {
+            description: "satellite",
+            answer: "人工衛星"
+        },
+        {
+            description: "evolution",
+            answer: "進化、発展"
+        },
+        {
+            description: "prey",
+            answer: "獲物"
+        },
+        {
+            description: "civilization",
+            answer: "文明"
+        },
+        {
+            description: "permission",
+            answer: "許可"
+        },
+        {
+            description: "wage",
+            answer: "賃金"
+        },
+        {
+            description: "embassy",
+            answer: "大使館"
+        },
+        {
+            description: "rural",
+            answer: "田舎の"
+        },
+        {
+            description: "beneficial",
+            answer: "有益な"
+        },
+        {
+            description: "genetic",
+            answer: "遺伝子の"
+        },
+        {
+            description: "radical",
+            answer: "根本的な"
+        },
+        {
+            description: "hostile",
+            answer: "敵意のある"
+        },
+        {
+            description: "fit",
+            answer: "健康な"
+        },
+        {
+            description: "Arctic",
+            answer: "北極の"
+        },
+
+        {
+            description: "minor",
+            answer: "重要ではない"
+        }, 
+        {
+            description: "competitive",
+            answer: "競争力のある"
+        },
+
+        {
+            description: "immediate",
+            answer: "即座の"
+        },
+
+        // PDF追加分（5ページ目）
+        {
+            description: "ボスニアの州都。1914 年にオーストリア皇太子夫妻が暗殺された「サラエボ事件」の舞台となり、第一次世界大戦の引き金となった地。",
+            answer: "サラエボ"
+        },
+        {
+            description: "ドイツ軍が立てた短期決戦用の作戦計画。中立国ベルギーを通って一気にフランスを倒し、その後ロシアへ転戦しようとした。",
+            answer: "シュリーフェンプラン"
+        },
+        {
+            description: "ドイツの軍人。東部戦線のタンネンベルクの戦いでロシア軍を撃破し、のちにヒンデンブルクとともにドイツの軍事独裁体制を確立した。",
+            answer: "ルーデンドルフ"
+        },
+        {
+            description: "1914 年、フランス・イギリス連合軍がドイツ軍の進撃を阻んだ戦い。これによりドイツの電撃作戦が崩壊し、長期的な塹壕戦（陣地戦）へ移行した。",
+            answer: "マルヌの戦い"
+        },
+        {
+            description: "1914 年、東部戦線でドイツ軍がロシア軍の侵攻を食い止め、大勝利を収めた戦い。",
+            answer: "タンネンベルクの戦い"
+        },
+        {
+            description: "1916 年、フランスの要塞都市ヴェルダンをめぐる独仏の激戦。両軍で数十万人の死傷者を出す凄惨な消耗戦となった。",
+            answer: "ヴェルダンの戦い"
+        },
+        {
+            description: "塹壕戦の膠着状態を打開するため、イギリスが開発して第一次世界大戦で初めて実戦投入した新兵器。",
+            answer: "戦車"
+        },
+        {
+            description: "1915 年、イギリスがアラブ人の指導者フセインと結んだ密約。オスマン帝国への反乱を条件にアラブ人の独立支援を約束した。",
+            answer: "フセイン・マクマホン協定"
+        },
+        {
+            description: "1916 年、イギリス・フランス・ロシアの間でオスマン帝国領の分割を定めた秘密協定。イギリスの三枚舌外交の 1 つ。",
+            answer: "サイクス・ピコ協定"
+        },
+        {
+            description: "ロシア帝国（ロマノフ朝）最後の皇帝。第一次世界大戦中の社会混乱から 1917 年にロシア革命（二月革命）が起き、退位させられた。",
+            answer: "ニコライ 2 世"
+        },
+        {
+            description: "1918 年、革命後のソヴィエト＝ロシアがドイツ等と同盟国と結んだ講和条約。厳しい条件を受け入れ大戦から離脱した。",
+            answer: "ブレスト・リトフスク条約"
+        },
+        {
+            description: "第一次世界大戦による世界的な船舶不足と海上輸送需要の高まりに乗じ、海運業や造船業で急速に巨万の富を得た日本の成金。",
+            answer: "船成金"
+        },
+        {
+            description: "1917 年、ドイツが指定海域を通る船を無警告で撃沈すると宣言した作戦。これが決定打となりアメリカが連合国側で参戦した。",
+            answer: "無制限潜水艦作戦"
+        },
+        {
+            description: "",
+            answer: ""
+        },
+         {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        {
+            description: "",
+            answer: ""
+        },
+        
+        {
+            description: "",
+            answer: ""
+        }
+    ];
+
+    let currentIndex = 0;
+
+    function loadQuestion() {
+        const currentQuiz = quizData[currentIndex];
+        document.getElementById("description").innerText = currentQuiz.description;
+        document.getElementById("answer").innerText = currentQuiz.answer;
+        document.getElementById("answer").classList.add("hidden");
+        document.getElementById("progress").innerText = `問題 ${currentIndex + 1} / ${quizData.length}`;
+    }
+
+    function showAnswer() {
+        document.getElementById("answer").classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+        currentIndex = (currentIndex + 1) % quizData.length;
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
